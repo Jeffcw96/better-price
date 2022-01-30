@@ -4,14 +4,21 @@
  */
 
 import { Request } from "express";
+import { Query, Params } from 'express-serve-static-core';
 
-interface BodyInput<T>{
+export interface TypedRequestQuery<T extends Query> extends Express.Request {
+    query: T
+}
+
+export interface TypedRequestBody<T> extends Express.Request {
     body: T
 }
 
-export type RequestInputInterface<T> = BodyInput<T> & {
-    [k:string]: any
+export interface TypedRequest< T extends Query,U> extends Request {
+    body: U,
+    query: T,
 }
+
 
 export default (req:Request) =>{
     let body = req.body || {}
