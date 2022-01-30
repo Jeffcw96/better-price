@@ -2,8 +2,9 @@ import Model from './model'
 import {InvalidParamException} from '@/config/exception/common'
 import { FailToGetShopeeProductListException } from '@/config/exception/shopee'
 import { TypedRequestQuery } from '@/utils/requestHandler'
+import { ProductListResponse } from '@/config/types/shopee'
 
-export default async function getShopeeProduct(inputData:TypedRequestQuery<{q:string}>){
+export default async function getShopeeProduct(inputData:TypedRequestQuery<{q:string}>):Promise<ProductListResponse | any>{
     try {
         let result 
         let total_count
