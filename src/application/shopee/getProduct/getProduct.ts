@@ -5,23 +5,31 @@ import { TypedRequestQuery } from '@/utils/requestHandler'
 
 export default async function getShopeeProduct(inputData:TypedRequestQuery<{q:string}>){
     try {
-        let result
+        let result 
+        let total_count
+
         const model = new Model(inputData)
 
+        //Execute API query
         try {
             const url = model.processURL()
-
             if(url === ""){
                 return new InvalidParamException()
             }
-
-            result = await model.getProductList(url)
+            const query = await model.getProductList(url)
+            result = query.data
+            total_count = query.data.total_count
 
         } catch (error) {
            throw new FailToGetShopeeProductListException()
         }
 
-        return result.data
+        //Mapping
+        result = model.infoMapping(result)
+
+
+
+        return result
 
     } catch (error) {
         return error
