@@ -1,12 +1,11 @@
 import Model from './model'
 import {InvalidParamException} from '@/config/exception/common'
-import { FailToGetShopeeProductListException } from '@/config/exception/shopee'
+import { FailToGetLazadaProductListException } from '@/config/exception/lazada'
 import { TypedRequestQuery } from '@/utils/requestHandler'
 import { ProductListResponse } from '@/config/types/shopee'
-import axios from 'axios'
 
 
-export default async function getShopeeProduct(inputData:TypedRequestQuery<{q:string}>):Promise<ProductListResponse | any>{
+export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:string}>):Promise<ProductListResponse | any>{
     try {
         let result 
         let total_count
@@ -24,11 +23,11 @@ export default async function getShopeeProduct(inputData:TypedRequestQuery<{q:st
             total_count = query.data.total_count
 
         } catch (error) {
-           throw new FailToGetShopeeProductListException()
+           throw new FailToGetLazadaProductListException()
         }
 
-        //Mapping
-        result = model.infoMapping(result)
+        //Get closest category link
+
 
 
 
