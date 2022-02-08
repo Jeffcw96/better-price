@@ -18,14 +18,14 @@ export interface LazadaProductList{
     mods:{
         filter:{
             tItemType  : string,
-            filterItems: Filter
+            filterItems: Filter[]
         },
         listItems: ListItem[]
     }
 }
 
 export interface Filter{
-          options: FilterOption[]
+    options      : FilterOption[]
     name  ?      : string
     title ?      : string
 }
