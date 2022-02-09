@@ -5,7 +5,7 @@ let time = randomIntFromInterval(4, 15)
 
 function randomIntFromInterval(min, max) { // min and max included 
     return (Math.floor(Math.random() * (max - min + 1) + min)) * convertToMS
-  }
+}
   
 
 
@@ -26,12 +26,14 @@ let getLazadaInfo = setInterval(async()=>{
           }
     })
 
-    if(!'rgv587_flag' in testLazada.data){
-      console.log("get dataa",testLazada.data)
+    console.log(`!testLazada.data.hasOwnProperty('rgv587_flag')`, !testLazada.data.hasOwnProperty('rgv587_flag'))
+    
+    if(!testLazada.data.hasOwnProperty('rgv587_flag')){
+      console.log("time to clear babe")
       clearInterval(getLazadaInfo)
     }
 
-    console.log("failed get dataa", testLazada.data)
+
 
 }, time)
 

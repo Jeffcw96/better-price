@@ -15,7 +15,7 @@ export enum SortBy {
 }
 
 export interface LazadaProductList{
-    mods:{
+    mods?:{
         filter:{
             tItemType  : string,
             filterItems: Filter[]
@@ -26,8 +26,9 @@ export interface LazadaProductList{
 
 export interface Filter{
     options      : FilterOption[]
-    name  ?      : string
-    title ?      : string
+    name         ?: string
+    title        ?: string
+    type         ?: string
 }
 
 export interface FilterOption{
