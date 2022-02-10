@@ -1,10 +1,13 @@
-import Model from './model'
+import Model, {Command} from './model'
 import {InvalidParamException} from '@/config/exception/common'
-import { FailToGetLazadaProductListException } from '@/config/exception/lazada'
 import { TypedRequestQuery } from '@/utils/requestHandler'
 import randomTime from '@/utils/randomTime'
 import { ProductListResponse } from '@/config/types/shopee'
 import { LazadaProductList } from '@/config/types/lazada'
+
+import { FailToGetLazadaProductListException,
+    MaxProductQueryErrorException,
+    MaxProductBrandQueryErrorException } from '@/config/exception/lazada'
 
 
 export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:string}>):Promise<ProductListResponse | any>{
@@ -26,13 +29,15 @@ export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:st
                 time = randomTime(4, 15)
                 const query = await model.getProductList(url)
 
-                if(query.success === true){                    
+                if(query.success === true){  
+                    clearInterval(queryInterval)                  
                     result = query.data
                     total_count = query.data.total_count
+                    model.setRequestCall(Command.RESET)
 
                 }else{
                     if(query.numberOfRequest >= 5){
-                        return 'Lazada Product API page got problem' //TBC to formatted error message
+                        return new MaxProductQueryErrorException()
                     }
                 }
             },time)
@@ -50,14 +55,27 @@ export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:st
                 /*
                     Todo:
                     need some postprocess for the url as currently it just contain a brunch of string
-                    reset numberReqCall
-                    try access the new endpoint again (repeatly try until success as how we do on above)
-                */
-
-                const brandSearchQuery = await model.getProductList(brandUrl)
+                */                
+                const queryInterval = setInterval(async()=>{
+                    time = randomTime(4, 15)
+                    const brandSearchQuery = await model.getProductList(brandUrl)
+    
+                    if(brandSearchQuery.success === true){  
+                        clearInterval(queryInterval)                  
+                        result = brandSearchQuery.data
+                        total_count = brandSearchQuery.data.total_count
+                        model.setRequestCall(Command.RESET)
+    
+                    }else{
+                        if(brandSearchQuery.numberOfRequest >= 5){
+                            return new MaxProductBrandQueryErrorException()
+                        }
+                    }
+                },time)
+                
 
             } catch (error) {
-                // log the error message
+                throw new FailToGetLazadaProductListException()
             }
         }
         

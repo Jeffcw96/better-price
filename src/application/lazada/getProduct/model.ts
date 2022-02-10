@@ -5,7 +5,7 @@ import { LazadaProductList , Filter} from "@/config/types/lazada"
 import config from '@/config/constant/lazada'
 
 
-enum Command{
+export enum Command{
     INCR  = 'incr',
     DECR  = 'decr',
     RESET = 'reset',
