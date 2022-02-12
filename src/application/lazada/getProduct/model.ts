@@ -3,7 +3,7 @@ import stringSimilarity from 'string-similarity'
 import { TypedRequestQuery } from "@/utils/requestHandler"
 import { LazadaProductList , Filter} from "@/config/types/lazada"
 import config from '@/config/constant/lazada'
-
+import { ProductListResponse } from "@/config/types/lazada"
 
 export enum Command{
     INCR  = 'incr',
@@ -13,18 +13,20 @@ export enum Command{
 
 export default class Lazada{
     keyword:string
+    isRequestProcessing:boolean
     numberOfRequestCall:number
     
     constructor(request:TypedRequestQuery<{q:string}>){
         this.keyword = request.query.q
         this.numberOfRequestCall = 0
+        this.isRequestProcessing = false
     }
 
     async getProductList(url:string){
         this.setRequestCall(Command.INCR)        
         const errorField = 'rgv587_flag'        
         const result = await axios.get(url, {
-            headers: config.uri_headers
+            headers: config.uriHeaders
         })
 
         return {
@@ -35,7 +37,15 @@ export default class Lazada{
 
     }
 
-    setRequestCall(command:Command){
+    getRequestStatus():boolean{
+        return this.isRequestProcessing
+    }
+
+    setRequestStatus(flag:boolean){
+        return this.isRequestProcessing = flag
+    }
+
+    setRequestCall(command:Command):void{
         if(command === Command.INCR){
             this.numberOfRequestCall++
 
@@ -47,15 +57,55 @@ export default class Lazada{
         }
     }
 
+    processQueryData(query:LazadaProductList):ProductListResponse[]{
+        if(!query.mods || !query.mods.listItems){
+            return []
+        }
+
+        const products = query.mods.listItems
+        const processedProducts = products.reduce((acc:any,product)=>{
+            const {
+                name,
+                image,
+                productUrl,
+                originalPrice,
+                price,
+                discount,
+                ratingScore
+            } = product
+
+            const processedOriginalPrice =  originalPrice ? parseFloat(originalPrice) : 0.00
+            const processedPrice = price ? parseFloat(price) : 0.00
+            const processedRating = ratingScore ? parseFloat(ratingScore) : -1
+
+            return [...acc,{
+                name,
+                image,
+                productUrl,
+                originalPrice: processedOriginalPrice,
+                price: processedPrice,
+                discount,
+                rating: processedRating
+            }]
+
+        },[])
+
+        return processedProducts
+    }
+
     processURL():string{
         if(this.keyword && this.keyword.length !== 0){
-            let apiUri = config.uri + "?"
+            let apiUri = config.catalogUri + "?"
             apiUri += `q=${encodeURI(this.keyword)}&`
             apiUri += `limit=40&`            
             apiUri += 'ajax=true&from=input&_keyori=ss&sort=popularity'
             return apiUri
         }
         return ""
+    }
+
+    processBrandUrl(brandUrl:string):string{
+        return `${config.baseUri}/${brandUrl}/?q=${encodeURI(this.keyword)}&limit=40&from=input&ajax=true`      
     }
 
     getClosestBrandLink(products:LazadaProductList):string{        

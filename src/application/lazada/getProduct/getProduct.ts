@@ -12,6 +12,7 @@ import { FailToGetLazadaProductListException,
 
 export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:string}>):Promise<ProductListResponse | any>{
     try {
+        console.log("lazada application")
         let time = randomTime(4, 15) //400ms to 1500ms
         let result:LazadaProductList = {}
         let total_count
@@ -25,62 +26,73 @@ export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:st
                 return new InvalidParamException()
             }
 
-            const queryInterval = setInterval(async()=>{
-                time = randomTime(4, 15)
-                const query = await model.getProductList(url)
-
-                if(query.success === true){  
-                    clearInterval(queryInterval)                  
-                    result = query.data
-                    total_count = query.data.total_count
-                    model.setRequestCall(Command.RESET)
-
-                }else{
-                    if(query.numberOfRequest >= 5){
-                        return new MaxProductQueryErrorException()
+            model.setRequestStatus(true)
+            await new Promise((resolve,_) =>{
+                const queryInterval = setInterval(async()=>{
+                    time = randomTime(4, 15)
+                    const query = await model.getProductList(url)
+                    if(query.success === true){  
+                        clearInterval(queryInterval)                  
+                        result = query.data
+                        total_count = query.data.total_count
+                        model.setRequestCall(Command.RESET)
+                        model.setRequestStatus(false)
+                        resolve("")
+                    }else{
+                        if(query.numberOfRequest >= 5){
+                            model.setRequestStatus(false)
+                            return new MaxProductQueryErrorException()
+                        }
                     }
-                }
-            },time)
-                   
+                },time)
+            })
+
+            console.log("outside lazada query")   
 
         } catch (error) {
            throw new FailToGetLazadaProductListException()
         }
     
         //Get closest category link
-        const brandUrl = model.getClosestBrandLink(result)
-    
-        if(brandUrl !== ""){
+        const brandPath = model.getClosestBrandLink(result)        
+
+        if(brandPath !== ""){
             try {
                 /*
                     Todo:
                     need some postprocess for the url as currently it just contain a brunch of string
-                */                
-                const queryInterval = setInterval(async()=>{
-                    time = randomTime(4, 15)
-                    const brandSearchQuery = await model.getProductList(brandUrl)
-    
-                    if(brandSearchQuery.success === true){  
-                        clearInterval(queryInterval)                  
-                        result = brandSearchQuery.data
-                        total_count = brandSearchQuery.data.total_count
-                        model.setRequestCall(Command.RESET)
-    
-                    }else{
-                        if(brandSearchQuery.numberOfRequest >= 5){
-                            return new MaxProductBrandQueryErrorException()
+                */ 
+                const brandUrl = model.processBrandUrl(brandPath)
+                model.setRequestStatus(true)  
+                await new Promise((resolve,_)=>{
+                    const queryInterval = setInterval(async()=>{
+                        time = randomTime(4, 15)
+                        const brandSearchQuery = await model.getProductList(brandUrl)
+        
+                        if(brandSearchQuery.success === true){  
+                            clearInterval(queryInterval)                  
+                            result = brandSearchQuery.data
+                            total_count = brandSearchQuery.data.total_count
+                            model.setRequestCall(Command.RESET)
+                            model.setRequestStatus(false)
+                            resolve("")
+                        }else{
+                            if(brandSearchQuery.numberOfRequest >= 5){
+                                model.setRequestStatus(false)
+                                return new MaxProductBrandQueryErrorException()
+                            }
                         }
-                    }
-                },time)
-                
+                    },time)
+                })                                             
 
             } catch (error) {
                 throw new FailToGetLazadaProductListException()
             }
         }
-        
-    
-        return result
+        console.log("outside lazada brand query") 
+        if(model.getRequestStatus() === false){            
+            return model.processQueryData(result)
+        }
 
     } catch (error) {
         return error

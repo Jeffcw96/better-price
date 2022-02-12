@@ -42,6 +42,7 @@ export interface FilterOption{
 
 export interface ListItem{
     name             : string
+    image            : string
     productUrl       : string
     originalPrice    : string
     originalPriceShow: string
@@ -50,4 +51,14 @@ export interface ListItem{
     discount         : string
     ratingScore      : string
     review           : string
+}
+
+export interface ProductListResponse{
+    name             : string
+    image            : string
+    productUrl       : string
+    originalPrice    : number
+    price            : number
+    discount         : string
+    rating           : number
 }

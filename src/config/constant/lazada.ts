@@ -1,6 +1,8 @@
+const baseUri = "https://www.lazada.com.my"
 export default{
-    uri:"https://www.lazada.com.my/catalog/",
-    uri_headers: {
+    baseUri,
+    catalogUri:`${baseUri}/catalog/`,
+    uriHeaders: {
         "Accept-Encoding": 'gzip, deflate, br',
         "Connection":'keep-alive',
         'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36',
