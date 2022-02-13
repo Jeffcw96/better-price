@@ -60,7 +60,7 @@ export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:st
             try {
                 /*
                     Todo:
-                    need some postprocess for the url as currently it just contain a brunch of string
+                    Extract salePrice and originalPrice in in product detail url 
                 */ 
                 const brandUrl = model.processBrandUrl(brandPath)
                 model.setRequestStatus(true)  

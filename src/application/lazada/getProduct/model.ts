@@ -140,7 +140,8 @@ export default class Lazada{
         },[])
 
         const {bestMatch, bestMatchIndex} = stringSimilarity.findBestMatch(this.keyword, brands)
-
+        
+        
         console.log('bestMatch',bestMatch)
         console.log('bestMatchIndex',bestMatchIndex)
         console.log('brandInfo.options[bestMatchIndex]',brandInfo.options[bestMatchIndex].value)
