@@ -1,10 +1,12 @@
-import axios from "axios"
+import axios from "@/utils/axios"
+import { Provider } from "@/utils/axios"
 import stringSimilarity from 'string-similarity'
 import { TypedRequestQuery } from "@/utils/requestHandler"
 import { LazadaProductList , Filter} from "@/config/types/lazada"
 import config from '@/config/constant/lazada'
 import { ProductListResponse } from "@/config/types/lazada"
 
+const request = axios(Provider.LAZADA)
 export enum Command{
     INCR  = 'incr',
     DECR  = 'decr',
@@ -25,7 +27,7 @@ export default class Lazada{
     async getProductList(url:string){
         this.setRequestCall(Command.INCR)        
         const errorField = 'rgv587_flag'        
-        const result = await axios.get(url, {
+        const result = await request.get(url, {
             headers: config.uriHeaders
         })
 
@@ -81,7 +83,7 @@ export default class Lazada{
             return [...acc,{
                 name,
                 image,
-                productUrl,
+                productUrl:`https:${productUrl}`,
                 originalPrice: processedOriginalPrice,
                 price: processedPrice,
                 discount,
