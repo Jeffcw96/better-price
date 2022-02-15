@@ -15,7 +15,7 @@ export enum SortBy {
 }
 
 export interface LazadaProductList{
-    mods:{
+    mods?:{
         filter:{
             tItemType  : string,
             filterItems: Filter[]
@@ -26,8 +26,9 @@ export interface LazadaProductList{
 
 export interface Filter{
     options      : FilterOption[]
-    name  ?      : string
-    title ?      : string
+    name         ?: string
+    title        ?: string
+    type         ?: string
 }
 
 export interface FilterOption{
@@ -41,6 +42,7 @@ export interface FilterOption{
 
 export interface ListItem{
     name             : string
+    image            : string
     productUrl       : string
     originalPrice    : string
     originalPriceShow: string
@@ -49,4 +51,14 @@ export interface ListItem{
     discount         : string
     ratingScore      : string
     review           : string
+}
+
+export interface ProductListResponse{
+    name             : string
+    image            : string
+    productUrl       : string
+    originalPrice    : number
+    price            : number
+    discount         : string
+    rating           : number
 }

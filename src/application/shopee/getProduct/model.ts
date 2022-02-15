@@ -1,9 +1,10 @@
-import axios from "axios"
+import axios from "@/utils/axios"
+import { Provider } from "@/utils/axios"
 import { TypedRequestQuery } from "@/utils/requestHandler"
 import { ShopeeProductList, ProductListResponse,ItemPrice} from "@/config/types/shopee"
 import config from '@/config/constant/shopee'
 
-
+const request = axios(Provider.SHOPEE)
 export default class Shopee{
     keyword:string | null
     
@@ -12,7 +13,7 @@ export default class Shopee{
     }
 
     async getProductList(url:string){
-        return await axios.get(url)
+        return await request.get(url)
     }
 
     processURL():string{
