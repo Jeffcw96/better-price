@@ -2,6 +2,7 @@ const axios = require('axios')
 const convertToMS = 100
 let time = randomIntFromInterval(4, 15)
 
+const testData = `<script src="test">whoelseeeee "price":{"discount":"-78%","originalPrice":{"text":"RM50.00","value":50},"salePrice":{"text":"RM10.90","value":10.9}},"quantity":{"limit":{"max":19,"min":1},"text":"","type":"default"},wakakakakakakakk"price":{"discount":"-78%","originalPrice":{"text":"RM22","value":50},"salePrice":{"text":"RM22","value":10.9}},"quantity":{"limit":{"max":19,"min":1},"text":"","type":"default"}, fui yohhhh "price":{"discount":"-78%","originalPrice":{"text":"RM50.00","value":50},"salePrice":{"text":"RM10.90","value":10.9}},"quantity":{"limit":{"max":19,"min":1},"text":"","type":"default"},</script>`
 
 function randomIntFromInterval(min, max) { // min and max included 
     return (Math.floor(Math.random() * (max - min + 1) + min)) * convertToMS
@@ -33,12 +34,6 @@ function isPriceInfo(data){
         return tempVal
       })    
 
-      
-      // console.log("result po ",extractedResult)
-      // console.log("parse", JSON.parse(extractedResult[5]))
-      // console.log("stringify", JSON.stringify(extractedResult))
-
-
       for(let i = 0; i < Object.keys(extractedResult).length; i++){        
         if(isPriceInfo(extractedResult[i])){
           const matchedPriceIndexes = findOccuranceIndexes(extractedResult[i],`"price":`)
@@ -48,9 +43,10 @@ function isPriceInfo(data){
           console.log("matchedQuantityIndexes",matchedQuantityIndexes)
           const minLength = matchedPriceIndexes.length < matchedQuantityIndexes.length ? matchedPriceIndexes.length : matchedQuantityIndexes.length
 
-          for(let j=0; j<minLength; j++){
+          for(let j=0; j<minLength; j++){ 
             const data = extractedResult[i].slice(matchedPriceIndexes[j], matchedQuantityIndexes[j])
-            console.log("data",data)
+            const parsedJsonData = JSON.parse(`{${data}}`)
+            console.log("data",parsedJsonData.price.salePrice.value)
 
 
           }
@@ -63,14 +59,15 @@ function isPriceInfo(data){
 
 function findOccuranceIndexes(string, parameter){
   let array = []
+  const tuneBackValue = parameter.length
   function occuranceIndexs(string, parameter, array){
     const matchedIndex = string.indexOf(parameter)
     if(matchedIndex === -1){
       return
     }
-    array.push(matchedIndex)
-    string = string.slice(matchedIndex+parameter.length)
-    // console.log("string",string)
+    array.push(matchedIndex)    
+    //if we only include matchedIndex but no tuneBackValue. It will caused max stack error as the matched Index will be always 0, need slice out the matched result after get their index
+    string = string.slice(matchedIndex+tuneBackValue)     
     occuranceIndexs(string,parameter,array)
   }
 
@@ -80,7 +77,7 @@ function findOccuranceIndexes(string, parameter){
   //Mapping + sum indexes
   for(let i = 0; i < array.length; i++){
     if(i !==0){
-      array[i] = array[i] + array[i-1]
+      array[i] = array[i] + array[i-1] + tuneBackValue //add back the value so that it will remove/ deduct the additional/extra index we added earlier
     }
   }
 
