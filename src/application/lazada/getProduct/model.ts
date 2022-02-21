@@ -148,7 +148,7 @@ export default class Lazada{
         console.log('bestMatchIndex',bestMatchIndex)
         console.log('brandInfo.options[bestMatchIndex]',brandInfo.options[bestMatchIndex].value)
         
-        return brandInfo.options[bestMatchIndex].value || ""
+        return (bestMatch.rating >= 0.75) ? brandInfo.options[bestMatchIndex].value || "" : ""
 
     }
  

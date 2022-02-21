@@ -4,10 +4,12 @@ import Model from './model'
 
 export default async function processor(products:{shopee:ShopeeProductList[], lazada:LazadaProductList[]}){
     try {
-        const model = new Model(products.lazada,products.shopee)
-        const lazadaProductIndexAdjustments = model.getLazadaIndexAdjustment()
+        const {shopee, lazada} = products
+        const model = new Model(lazada,shopee)
+        const lazadaProductIndexAdjustments = model.getLazadaIndexAdjustment()        
         console.log("index adjustment", lazadaProductIndexAdjustments)
-
+        const mappedLazadaRankProduct = model.arrangeProductIndex(lazada,lazadaProductIndexAdjustments)
+        return mappedLazadaRankProduct
     } catch (error) {
         
     }

@@ -12,23 +12,71 @@ export default class Processor{
     }
 
     getLazadaIndexAdjustment(){
-        const lazadaRanking = this.lazada.reduce((acc:number[],val,ind)=>{
-            let closestShopeeIndex = 0
-            let highestRank = 0
+        console.time("process")
+        let lazadaRanking:number[] = []
+        this.lazada.forEach((val)=>{
+            let tempRankObject:{[k:number]: number} = {}
             for(let i =0; i< this.shopee.length; i++){
                 const shopeeProduct = this.shopee[i]
                 const rank = compareTwoStrings(val.name,shopeeProduct.name) * 100
-                
-                console.log(`current rank => ${rank} | highest rank => ${highestRank}`)
-                if(rank > highestRank){
-                    highestRank = rank
-                    closestShopeeIndex = ind
-                }
+                tempRankObject[i] = rank
             }
-            return [...acc,closestShopeeIndex]
-        },[])
 
+            /*
+                update object with {index: rank}
+                If current closestShopeeIndex is being called/ used in previous process.
+                use the second/ following rank
+            */
+            const sortedRankIndex = this.sortRankByIndex(tempRankObject)
+            for(let index of sortedRankIndex){
+                if(lazadaRanking.includes(index)){
+                    continue
+                }
+                lazadaRanking.push(index)
+                break
+            }
+        })
+
+        console.timeEnd("process")
         return lazadaRanking
+    }
+
+    sortRankByIndex(object:{[k:number]: number}){
+        /*
+            Object payload:
+                {
+                    {
+                        [index] : rank value from compare naming
+                    },
+                    {
+                        xxxx
+                    }
+                }
+        */
+        const result = Object
+                        .entries(object) 
+                        .sort((a, b) => { return b[1] - a[1]}) // sort the array [[index, rank], [index, rank]] with rank value
+                        .reduce((acc:number[],[index,_])=>{ //only cares about their index in order to do deduplication
+                            return [...acc,parseInt(index)]
+                        },[])
+
+        return result
+    }
+
+
+    arrangeProductIndex(lazada:LazadaProductList[], indexArr:number[]){
+        let mappedProducts:LazadaProductList[] = Array(indexArr.length).fill(null)
+
+        for(let index of indexArr){            
+            mappedProducts[index] = lazada[index]
+        }
+
+        return mappedProducts
+    }
+
+    swapPosition(arr:any[], indexOne:number, indexTwo:number){
+        [arr[indexOne], arr[indexTwo]] = [arr[indexTwo], arr[indexOne]];
+        return arr
     }
 
 }

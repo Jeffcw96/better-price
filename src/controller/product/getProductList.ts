@@ -11,7 +11,7 @@ import processor from '@/application/processor';
 export default async function getProductList(req:TypedRequestQuery<{ q: string}>, res:Response){
     // const inputData = requestHandler(req)
     const [shopeeResult, lazadaResult] = await Promise.all([shopee.getProduct(req),lazada.getProduct(req)])
-    processor({shopee:shopeeResult, lazada:lazadaResult})
-    responseHandler(res,{shopee:shopeeResult, lazada:lazadaResult})
+    const processedLazadaProducts = await processor({shopee:shopeeResult, lazada:lazadaResult})
+    responseHandler(res,{shopee:shopeeResult, lazada:processedLazadaProducts})
 }
 
