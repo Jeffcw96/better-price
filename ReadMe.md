@@ -17,3 +17,11 @@
 ### Extras
 - Implement Image processing for comparing images and get the closest 2 products between 2 platforms
 - Open for more countries other than MY
+
+
+### Url (https://www.tablesgenerator.com/markdown_tables#)
+| Description                   | Url                                                                                             |
+|-------------------------------|-------------------------------------------------------------------------------------------------|
+| Shopee Brand category         | https://shopee.com.my/api/v4/search/search_filter_config?keyword=car%20perfume&page_type=search |
+| Shopee Product URL with brand | https://shopee.com.my/search?brands=<BRAND_ID>&keyword=car%20perfume&noCorrection=true&page=0   |
+|                               |                                                                                                 |

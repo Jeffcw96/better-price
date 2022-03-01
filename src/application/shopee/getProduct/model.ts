@@ -8,7 +8,7 @@ const request = axios(Provider.SHOPEE)
 export default class Shopee{
     keyword:string | null
     
-    constructor(request:TypedRequestQuery<{q:string}>){
+    constructor(request:TypedRequestQuery<{q:string, brand:string}>){
         this.keyword = request.query.q
     }
 
@@ -18,13 +18,13 @@ export default class Shopee{
 
     processURL():string{
         if(this.keyword && this.keyword.length !== 0){
-            let apiUri = config.uri + "?"
-            apiUri += `by=relavancy&`
-            apiUri += `keyword=${encodeURI(this.keyword)}&`
-            apiUri += `limit=40&`
-            apiUri += `newest=0&`
-            apiUri += 'page_type=search&scenerio=PAGE_GLOBAL_SEARCH&version=2'
-            return apiUri
+            let apiUrl = config.url + "?"
+            apiUrl += `by=relavancy&`
+            apiUrl += `keyword=${encodeURI(this.keyword)}&`
+            apiUrl += `limit=40&`
+            apiUrl += `newest=0&`
+            apiUrl += 'page_type=search&scenerio=PAGE_GLOBAL_SEARCH&version=2'
+            return apiUrl
         }
         return ""
     }

@@ -1,15 +1,14 @@
 import Model from './model'
 import {InvalidParamException} from '@/config/exception/common'
-import { FailToGetShopeeProductListException } from '@/config/exception/shopee'
+import { FailToGetShopeeBrandsException } from '@/config/exception/shopee'
 import { TypedRequestQuery } from '@/utils/requestHandler'
 import { ProductListResponse } from '@/config/types/shopee'
 import axios from 'axios'
 
 
-export default async function getShopeeProduct(inputData:TypedRequestQuery<{q:string, brand:string}>):Promise<ProductListResponse | any>{
+export default async function getShopeeFilterOptions(inputData:TypedRequestQuery<{q:string, brand:string}>):Promise<ProductListResponse | any>{
     try {
         let result 
-        let total_count
 
         const model = new Model(inputData)
 
@@ -19,18 +18,13 @@ export default async function getShopeeProduct(inputData:TypedRequestQuery<{q:st
             if(url === ""){
                 return new InvalidParamException()
             }
-            const query = await model.getProductList(url)
-            result = query.data
-            total_count = query.data.total_count
+            const {data} = await model.getProductList(url)
+            result = model.getBrandOptions(data)
 
         } catch (error) {
-           throw new FailToGetShopeeProductListException()
+           console.error(error)
+           throw new FailToGetShopeeBrandsException()
         }
-
-        //Mapping
-        result = model.infoMapping(result)
-
-
 
         return result
 

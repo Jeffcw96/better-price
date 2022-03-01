@@ -18,7 +18,7 @@ export default class Lazada{
     isRequestProcessing:boolean
     numberOfRequestCall:number
     
-    constructor(request:TypedRequestQuery<{q:string}>){
+    constructor(request:TypedRequestQuery<{q:string, brand:string}>){
         this.keyword = request.query.q
         this.numberOfRequestCall = 0
         this.isRequestProcessing = false
@@ -28,7 +28,7 @@ export default class Lazada{
         this.setRequestCall(Command.INCR)        
         const errorField = 'rgv587_flag'        
         const result = await request.get(url, {
-            headers: config.uriHeaders
+            headers: config.urlHeaders
         })
 
         return {
@@ -59,9 +59,9 @@ export default class Lazada{
         }
     }
 
-    processQueryData(query:LazadaProductList):ProductListResponse[]{
+    processQueryData(query:LazadaProductList):{products:ProductListResponse[], brands:string[]}{
         if(!query.mods || !query.mods.listItems){
-            return []
+            return {products:[], brands:[]}
         }
 
         const products = query.mods.listItems
@@ -92,22 +92,52 @@ export default class Lazada{
 
         },[])
 
-        return processedProducts
+        return {products: processedProducts, brands:this.processBrandData(query)}
+    }
+
+    processBrandData(products:LazadaProductList):string[]{
+        const filterItems = products?.mods?.filter?.filterItems || []
+
+        if(!filterItems || filterItems.length === 0){
+            return []
+        }
+
+        // to do filter the brand filter type here then return the object
+        // loop through the options title and use stringSimilarity.compareTwoStrings to get the higher ranked between search keyword and brand title
+        const brandInfo = filterItems.find(item =>{
+            return item.name === 'brand' || item.type === 'brand'
+        })
+
+        if(!brandInfo || brandInfo === undefined){
+            return []            
+        }
+        
+        const brands = brandInfo.options.reduce<string[]>((acc,val)=>{
+            if(val.title){
+                return [...acc, val.title]
+            }else if(val.value){
+                return [...acc, val.value]
+            }
+            return acc
+
+        },[])
+
+        return brands
     }
 
     processURL():string{
         if(this.keyword && this.keyword.length !== 0){
-            let apiUri = config.catalogUri + "?"
-            apiUri += `q=${encodeURI(this.keyword)}&`
-            apiUri += `limit=40&`            
-            apiUri += 'ajax=true&from=input&_keyori=ss&sort=popularity'
-            return apiUri
+            let apiUrl = config.catalogUrl + "?"
+            apiUrl += `q=${encodeURI(this.keyword)}&`
+            apiUrl += `limit=40&`            
+            apiUrl += 'ajax=true&from=input&_keyori=ss&sort=popularity'
+            return apiUrl
         }
         return ""
     }
 
     processBrandUrl(brandUrl:string):string{
-        return `${config.baseUri}/${brandUrl}/?q=${encodeURI(this.keyword)}&limit=40&from=input&ajax=true`      
+        return `${config.baseUrl}/${brandUrl}/?q=${encodeURI(this.keyword)}&limit=40&from=input&ajax=true`      
     }
 
     getClosestBrandLink(products:LazadaProductList):string{        
@@ -148,7 +178,7 @@ export default class Lazada{
         console.log('bestMatchIndex',bestMatchIndex)
         console.log('brandInfo.options[bestMatchIndex]',brandInfo.options[bestMatchIndex].value)
         
-        return brandInfo.options[bestMatchIndex].value || ""
+        return (bestMatch.rating >= 0.75) ? brandInfo.options[bestMatchIndex].value || "" : ""
 
     }
  
