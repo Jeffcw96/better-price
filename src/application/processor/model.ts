@@ -3,10 +3,10 @@ import { ProductListResponse as LazadaProductList } from "@/config/types/lazada"
 import { compareTwoStrings } from "string-similarity";
 
 export default class Processor{
-    lazada:LazadaProductList[]
+    lazada:{products:LazadaProductList[], brands:string[]}
     shopee:ShopeeProductList[]
 
-    constructor(lazada:LazadaProductList[],shopee:ShopeeProductList[]){
+    constructor(lazada:{products:LazadaProductList[], brands:string[]},shopee:ShopeeProductList[]){
         this.lazada = lazada
         this.shopee = shopee
     }
@@ -14,7 +14,7 @@ export default class Processor{
     getLazadaIndexAdjustment(){
         console.time("process")
         let lazadaRanking:number[] = []
-        this.lazada.forEach((val)=>{
+        this.lazada.products.forEach((val)=>{
             let tempRankObject:{[k:number]: number} = {}
             for(let i =0; i< this.shopee.length; i++){
                 const shopeeProduct = this.shopee[i]
@@ -72,11 +72,6 @@ export default class Processor{
         }
 
         return mappedProducts
-    }
-
-    swapPosition(arr:any[], indexOne:number, indexTwo:number){
-        [arr[indexOne], arr[indexTwo]] = [arr[indexTwo], arr[indexOne]];
-        return arr
     }
 
 }

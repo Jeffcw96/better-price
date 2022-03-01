@@ -18,7 +18,7 @@ export default class Lazada{
     isRequestProcessing:boolean
     numberOfRequestCall:number
     
-    constructor(request:TypedRequestQuery<{q:string}>){
+    constructor(request:TypedRequestQuery<{q:string, brand:string}>){
         this.keyword = request.query.q
         this.numberOfRequestCall = 0
         this.isRequestProcessing = false
@@ -59,9 +59,9 @@ export default class Lazada{
         }
     }
 
-    processQueryData(query:LazadaProductList):ProductListResponse[]{
+    processQueryData(query:LazadaProductList):{products:ProductListResponse[], brands:string[]}{
         if(!query.mods || !query.mods.listItems){
-            return []
+            return {products:[], brands:[]}
         }
 
         const products = query.mods.listItems
@@ -92,7 +92,37 @@ export default class Lazada{
 
         },[])
 
-        return processedProducts
+        return {products: processedProducts, brands:this.processBrandData(query)}
+    }
+
+    processBrandData(products:LazadaProductList):string[]{
+        const filterItems = products?.mods?.filter?.filterItems || []
+
+        if(!filterItems || filterItems.length === 0){
+            return []
+        }
+
+        // to do filter the brand filter type here then return the object
+        // loop through the options title and use stringSimilarity.compareTwoStrings to get the higher ranked between search keyword and brand title
+        const brandInfo = filterItems.find(item =>{
+            return item.name === 'brand' || item.type === 'brand'
+        })
+
+        if(!brandInfo || brandInfo === undefined){
+            return []            
+        }
+        
+        const brands = brandInfo.options.reduce<string[]>((acc,val)=>{
+            if(val.title){
+                return [...acc, val.title]
+            }else if(val.value){
+                return [...acc, val.value]
+            }
+            return acc
+
+        },[])
+
+        return brands
     }
 
     processURL():string{

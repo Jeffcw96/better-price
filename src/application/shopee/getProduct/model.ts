@@ -8,7 +8,7 @@ const request = axios(Provider.SHOPEE)
 export default class Shopee{
     keyword:string | null
     
-    constructor(request:TypedRequestQuery<{q:string}>){
+    constructor(request:TypedRequestQuery<{q:string, brand:string}>){
         this.keyword = request.query.q
     }
 

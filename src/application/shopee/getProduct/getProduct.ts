@@ -6,7 +6,7 @@ import { ProductListResponse } from '@/config/types/shopee'
 import axios from 'axios'
 
 
-export default async function getShopeeProduct(inputData:TypedRequestQuery<{q:string}>):Promise<ProductListResponse | any>{
+export default async function getShopeeProduct(inputData:TypedRequestQuery<{q:string, brand:string}>):Promise<ProductListResponse | any>{
     try {
         let result 
         let total_count

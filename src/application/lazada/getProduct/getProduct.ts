@@ -2,15 +2,15 @@ import Model, {Command} from './model'
 import {InvalidParamException} from '@/config/exception/common'
 import { TypedRequestQuery } from '@/utils/requestHandler'
 import randomTime from '@/utils/randomTime'
+import retryRequest from '@/utils/retryRequest'
 import { ProductListResponse } from '@/config/types/shopee'
 import { LazadaProductList } from '@/config/types/lazada'
-
 import { FailToGetLazadaProductListException,
     MaxProductQueryErrorException,
     MaxProductBrandQueryErrorException } from '@/config/exception/lazada'
 
 
-export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:string}>):Promise<ProductListResponse | any>{
+export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:string, brand:string}>):Promise<ProductListResponse | any>{
     try {
         console.log("lazada application")
         let time = randomTime(4, 15) //400ms to 1500ms
@@ -27,6 +27,7 @@ export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:st
             }
 
             model.setRequestStatus(true)
+        
             await new Promise((resolve,_) =>{
                 const queryInterval = setInterval(async()=>{
                     time = randomTime(4, 15)
@@ -54,43 +55,44 @@ export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:st
         }
     
         //Get closest category link
-        const brandPath = model.getClosestBrandLink(result)        
+        // const brandPath = model.getClosestBrandLink(result)        
 
-        if(brandPath !== ""){
-            try {
-                /*
-                    Todo:
-                    Extract salePrice and originalPrice in in product detail url 
-                */ 
-                const brandUrl = model.processBrandUrl(brandPath)
-                model.setRequestStatus(true)  
-                await new Promise((resolve,_)=>{
-                    const queryInterval = setInterval(async()=>{
-                        time = randomTime(4, 15)
-                        const brandSearchQuery = await model.getProductList(brandUrl)
+        // if(brandPath !== ""){
+        //     try {
+        //         /*
+        //             Todo:
+        //             Extract salePrice and originalPrice in in product detail url 
+        //         */ 
+        //         const brandUrl = model.processBrandUrl(brandPath)
+        //         model.setRequestStatus(true)  
+        //         await new Promise((resolve,_)=>{
+        //             const queryInterval = setInterval(async()=>{
+        //                 time = randomTime(4, 15)
+        //                 const brandSearchQuery = await model.getProductList(brandUrl)
         
-                        if(brandSearchQuery.success === true){  
-                            clearInterval(queryInterval)                  
-                            result = brandSearchQuery.data
-                            total_count = brandSearchQuery.data.total_count
-                            model.setRequestCall(Command.RESET)
-                            model.setRequestStatus(false)
-                            resolve("")
-                        }else{
-                            if(brandSearchQuery.numberOfRequest >= 5){
-                                model.setRequestStatus(false)
-                                return new MaxProductBrandQueryErrorException()
-                            }
-                        }
-                    },time)
-                })                                             
+        //                 if(brandSearchQuery.success === true){  
+        //                     clearInterval(queryInterval)                  
+        //                     result = brandSearchQuery.data
+        //                     total_count = brandSearchQuery.data.total_count
+        //                     model.setRequestCall(Command.RESET)
+        //                     model.setRequestStatus(false)
+        //                     resolve("")
+        //                 }else{
+        //                     if(brandSearchQuery.numberOfRequest >= 5){
+        //                         model.setRequestStatus(false)
+        //                         return new MaxProductBrandQueryErrorException()
+        //                     }
+        //                 }
+        //             },time)
+        //         })                                             
 
-            } catch (error) {
-                throw new FailToGetLazadaProductListException()
-            }
-        }
-        console.log("outside lazada brand query") 
-        if(model.getRequestStatus() === false){            
+        //     } catch (error) {
+        //         throw new FailToGetLazadaProductListException()
+        //     }
+        // }
+        // console.log("outside lazada brand query") 
+
+        if(model.getRequestStatus() === false){           
             return model.processQueryData(result)
         }
 
