@@ -28,7 +28,7 @@ export default class Lazada{
         this.setRequestCall(Command.INCR)        
         const errorField = 'rgv587_flag'        
         const result = await request.get(url, {
-            headers: config.uriHeaders
+            headers: config.urlHeaders
         })
 
         return {
@@ -127,17 +127,17 @@ export default class Lazada{
 
     processURL():string{
         if(this.keyword && this.keyword.length !== 0){
-            let apiUri = config.catalogUri + "?"
-            apiUri += `q=${encodeURI(this.keyword)}&`
-            apiUri += `limit=40&`            
-            apiUri += 'ajax=true&from=input&_keyori=ss&sort=popularity'
-            return apiUri
+            let apiUrl = config.catalogUrl + "?"
+            apiUrl += `q=${encodeURI(this.keyword)}&`
+            apiUrl += `limit=40&`            
+            apiUrl += 'ajax=true&from=input&_keyori=ss&sort=popularity'
+            return apiUrl
         }
         return ""
     }
 
     processBrandUrl(brandUrl:string):string{
-        return `${config.baseUri}/${brandUrl}/?q=${encodeURI(this.keyword)}&limit=40&from=input&ajax=true`      
+        return `${config.baseUrl}/${brandUrl}/?q=${encodeURI(this.keyword)}&limit=40&from=input&ajax=true`      
     }
 
     getClosestBrandLink(products:LazadaProductList):string{        

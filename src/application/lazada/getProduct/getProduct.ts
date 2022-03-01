@@ -2,7 +2,6 @@ import Model, {Command} from './model'
 import {InvalidParamException} from '@/config/exception/common'
 import { TypedRequestQuery } from '@/utils/requestHandler'
 import randomTime from '@/utils/randomTime'
-import retryRequest from '@/utils/retryRequest'
 import { ProductListResponse } from '@/config/types/shopee'
 import { LazadaProductList } from '@/config/types/lazada'
 import { FailToGetLazadaProductListException,
@@ -26,7 +25,7 @@ export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:st
                 return new InvalidParamException()
             }
 
-            model.setRequestStatus(true)
+            // model.setRequestStatus(true)
         
             await new Promise((resolve,_) =>{
                 const queryInterval = setInterval(async()=>{
@@ -36,12 +35,12 @@ export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:st
                         clearInterval(queryInterval)                  
                         result = query.data
                         total_count = query.data.total_count
-                        model.setRequestCall(Command.RESET)
-                        model.setRequestStatus(false)
+                        // model.setRequestCall(Command.RESET)
+                        // model.setRequestStatus(false)
                         resolve("")
                     }else{
                         if(query.numberOfRequest >= 5){
-                            model.setRequestStatus(false)
+                            // model.setRequestStatus(false)
                             return new MaxProductQueryErrorException()
                         }
                     }
@@ -92,10 +91,7 @@ export default async function getLazadaProduct(inputData:TypedRequestQuery<{q:st
         // }
         // console.log("outside lazada brand query") 
 
-        if(model.getRequestStatus() === false){           
-            return model.processQueryData(result)
-        }
-
+        return model.processQueryData(result)
     } catch (error) {
         return error
     }

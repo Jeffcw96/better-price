@@ -12,5 +12,6 @@ export default async function processor(products:{shopee:ShopeeProductList[], la
         return {products:mappedLazadaRankProduct, brands: lazada.brands}
     } catch (error) {
         return error
+        
     }
 }
